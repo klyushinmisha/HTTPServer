@@ -22,6 +22,7 @@ public class Worker implements Runnable {
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(client.getInputStream())
             );
+
             PrintWriter out = new PrintWriter(
                     new OutputStreamWriter(client.getOutputStream())
             );
@@ -45,7 +46,7 @@ public class Worker implements Runnable {
                 if (!urlBindings.containsKey(request.getUrl())) {
                     response = this.handleNotFound();
                     response.setVersion(request.getVersion());
-                    out.write(response.parseData());
+                    out.write(response.parseMetadata());
                     out.flush();
                     return;
                 }
@@ -53,15 +54,15 @@ public class Worker implements Runnable {
                 if (request.getMethod().compareTo(binding.getMethod()) != 0) {
                     response = this.handleMethodNotAllowed();
                     response.setVersion(request.getVersion());
-                    out.write(response.parseData());
+                    out.write(response.parseMetadata());
                     out.flush();
                     return;
                 }
                 response = binding.getHandler().handleRequest(request);
                 response.setVersion(request.getVersion());
-                String strResp = response.parseData();
-                out.write(strResp);
+                out.write(response.parseMetadata());
                 out.flush();
+                client.getOutputStream().write(response.getBody());
             } catch (IOException e) {
 
             } finally {
