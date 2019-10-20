@@ -27,11 +27,17 @@ public class HTTPResponse {
             case 200:
                 this.statusMessage = "OK";
                 break;
+            case 400:
+                this.statusMessage = "Bad Request";
+                break;
             case 403:
                 this.statusMessage = "Method Not Allowed";
                 break;
             case 404:
                 this.statusMessage = "Not Found";
+                break;
+            case 422:
+                this.statusMessage = "Unprocessable Entity";
                 break;
         }
     }

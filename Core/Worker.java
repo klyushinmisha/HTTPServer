@@ -4,6 +4,7 @@ import com.mikhail.ksp.HTTPServer.Utils.ServerUrlBind;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Worker implements Runnable {
@@ -43,6 +44,16 @@ public class Worker implements Runnable {
                 request.parseData(httpData);
 
                 HTTPResponse response;
+
+
+                if (request.getQueryParams() == null) {
+                    response = this.handleUnprocessableEntity();
+                    response.setVersion(request.getVersion());
+                    out.write(response.parseMetadata());
+                    out.flush();
+                    return;
+                }
+
                 if (!urlBindings.containsKey(request.getUrl())) {
                     response = this.handleNotFound();
                     response.setVersion(request.getVersion());
@@ -84,6 +95,12 @@ public class Worker implements Runnable {
     private HTTPResponse handleNotFound() {
         HTTPResponse response = new HTTPResponse();
         response.setStatus(404);
+        return response;
+    }
+
+    private HTTPResponse handleUnprocessableEntity() {
+        HTTPResponse response = new HTTPResponse();
+        response.setStatus(422);
         return response;
     }
 }

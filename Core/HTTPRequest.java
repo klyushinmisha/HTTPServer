@@ -13,6 +13,7 @@ public class HTTPRequest {
 
     private String method;
     private String url;
+    private HashMap<String, String> queryParams;
     private String version;
 
     private HashMap<String, String> headers = new HashMap<>();
@@ -25,6 +26,10 @@ public class HTTPRequest {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public void setQueryParams(HashMap<String, String> queryParams) {
+        this.queryParams = queryParams;
     }
 
     public void setVersion(String version) {
@@ -47,16 +52,12 @@ public class HTTPRequest {
         return url;
     }
 
+    public HashMap<String, String> getQueryParams() {
+        return queryParams;
+    }
+
     public String getVersion() {
         return version;
-    }
-
-    public HashMap<String, String> getHeaders() {
-        return headers;
-    }
-
-    public String getBody() {
-        return body;
     }
 
     public HTTPRequest() {
@@ -66,7 +67,18 @@ public class HTTPRequest {
     private void parseStartLine(String startLine) {
         String[] data = startLine.split(" ", 3);
         this.setMethod(data[0]);
-        this.setUrl(data[1]);
+
+        String url = data[1];
+        String[] urlData = url.split("\\?", 2);
+        url = urlData[0];
+        String queryParams = null;
+        if (urlData.length == 2) {
+            queryParams = urlData[1];
+        }
+
+        HashMap<String, String> paramsMap = parseQueryParams(queryParams);
+        this.setUrl(url);
+        this.setQueryParams(paramsMap);
         this.setVersion(data[2]);
     }
 
@@ -97,5 +109,25 @@ public class HTTPRequest {
             }
         }
         this.setBody(body);
+    }
+
+    private HashMap<String, String> parseQueryParams(String queryParams) {
+        HashMap<String, String> paramsMap = new HashMap<>();
+        if (queryParams == null) {
+            return paramsMap;
+        }
+        for (String qp : queryParams.split("&")) {
+            String[] paramData = qp.split("=", 2);
+            for (String str : paramData) {
+                if (str.compareTo("") == 0) {
+                    return null;
+                }
+            }
+            if (paramData.length != 2) {
+                return null;
+            }
+            paramsMap.put(paramData[0], paramData[1]);
+        }
+        return paramsMap;
     }
 }
